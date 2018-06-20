@@ -19,7 +19,6 @@ public static class ItemData
         {
             #region Archetypes
             #region Spells
-            #region main Archetypes:
             #region RainbowRoyalty
             case 001:
                 name = "Chromagic: Delta Hurricane";
@@ -103,6 +102,14 @@ public static class ItemData
                 type = "Dark";
                 break;
             #endregion
+            #region Forest Fury
+
+#endregion
+            #region United
+
+            #endregion
+            #region World Tortoise
+
             #endregion
             #endregion
 
@@ -225,6 +232,49 @@ public static class ItemData
                 name = "Ascension Dragon, Breeding Form";
                 break;
             #endregion
+            #region Forest Fury
+            case 122:
+                name = "Sapling";
+                description = "The turn after this card is flipped faceup, you may token it, and summon 1 Dryad or 1 Treeant from the deck.  If this card is in the Graveyard, you may banish it to summon 1 Poison Oak Knight or 1 Poison Ivy Witch from the deck.";
+                type = "Wood";
+                attack = 300;
+                defense = 300;
+                rank = 2;
+                cardType = ItemType.Monster;
+                break;
+            case 123:
+                name = "Dryad";
+                description = "The turn after this card is summoned, you may toekn it, and summon one Hamadryad from the deck.  If this effect is used, return 1 Sapling from the graveyard to the deck.  If this card was summoned using the effect of Sapling, it gains 300 DEF.";
+                type = "Wood";
+                attack = 1600;
+                defense = 1800;
+                rank = 4;
+                cardType = ItemType.Monster;
+                break;
+            case 124:
+                name = "Hamadryad";
+                description = "This card cannot be normal summoned.  If this card was special summoned through the effect of Dryad, negate and destroy all trap cards on the field while this card remains face-up.";
+                type = "Wood";
+                attack = 2000;
+                defense = 2400;
+                rank = 8;
+                cardType = ItemType.Monster;
+                break;
+            case 125:
+                name = "Treeant";
+                description = "The turn after this card was summoned, you may token it, and summon one Ent from the deck.  If this effect is used, return 1 Sapling from the Graveyard to the deck.  If this card was summoned using the effect of Sapling, it gains 300 ATK";
+                type = "Wood";
+                attack = 1500;
+                defense = 1600;
+                rank = 4;
+                cardType = ItemType.Monster;
+                break;
+#endregion
+            #region United
+
+            #endregion
+            #region World Tortoise
+            #endregion
             #endregion
 
             #region Traps
@@ -257,6 +307,12 @@ public static class ItemData
                 type = "Light";
                 break;
             #endregion
+            #region United
+
+            #endregion
+            #region World Tortoise
+
+            #endregion
             #endregion
             #endregion
 
@@ -265,6 +321,36 @@ public static class ItemData
             case 400:
                 name = "Vicious Frenzy";
                 description = "Target a face-up monster.  You may force that monster to attack one of your opponents monsters.  Damage calculation is done normally.";
+                type = "Dark";
+                cardType = ItemType.Spell;
+                break;
+            case 401:
+                name = "Sunbeam";
+                description = "Gain 1000 health on the next turn after this card is played";
+                type = "Light";
+                cardType = ItemType.Spell;
+                break;
+            case 402:
+                name = "Bandit Specialist";
+                description = "Spend 500 Health.  Your opponent discards any and all traps currently in their hand";
+                type = "Fire";
+                cardType = ItemType.Spell;
+                break;
+            #endregion
+            #region Monsters
+            #endregion
+            #region Traps
+            case 600:
+                name = "False Expectations";
+                description = "Players each select a card from the other persons hand at random.  If the card selected was a spell or trap, the original owner draws a card.  Otherwise, the drawing player must guess the type of monster.  If they guess successfully, they summon it in face down position.  If they guess incorrectly, the original owner summons it to their field in face down position";
+                type = "Energy";
+                cardType = ItemType.Trap;
+                break;
+            case 601:
+                name = "Surface Tension";
+                description = "Negate the current attack, also, the user takes no battle damage until the end of their opponents next turn";
+                type = "Water";
+                cardType = ItemType.Trap;
                 break;
             #endregion
             #endregion

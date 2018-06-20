@@ -17,6 +17,7 @@ public class Inventory : MonoBehaviour
 
     public static List<Item> RainbowRoyalty = new List<Item>();
     public static List<Item> AscendingWyrm = new List<Item>();
+    public static List<Item> ForestFury = new List<Item>();
     public static List<Item> United = new List<Item>();
 
     public bool deckA;
@@ -27,11 +28,14 @@ public class Inventory : MonoBehaviour
     #region deckPrefabs
     public bool RainbowRoyaltyCheck;
     public bool AscendingWyrmCheck;
+    public bool ForestFuryCheck;
     public bool UnitedCheck;
     #endregion
 
     public bool playerTurn;
     public bool showGY;
+    public bool showDeckC;
+    public bool showField;
 
     float scrW = Screen.width / 16;
     float scrH = Screen.height / 9;
@@ -42,6 +46,9 @@ public class Inventory : MonoBehaviour
     void Start()
     {
         cardsDrawn = 0;
+
+        showDeckC = false;
+        showField = true;
 
         playerTurn = false;
         #region Archetypes
@@ -91,6 +98,13 @@ public class Inventory : MonoBehaviour
         AscendingWyrm.Add(ItemData.CreateItem(121));
         AscendingWyrm.Add(ItemData.CreateItem(205));
         #endregion
+        #region ForestFury
+        ForestFury = new List<Item>();
+        ForestFury.Add(ItemData.CreateItem(122));
+        ForestFury.Add(ItemData.CreateItem(123));
+        ForestFury.Add(ItemData.CreateItem(124));
+        ForestFury.Add(ItemData.CreateItem(125));
+        #endregion
 
         #endregion
 
@@ -113,11 +127,13 @@ public class Inventory : MonoBehaviour
             {
                 deckA = false;
                 deckB = true;
+                selectedItem = null;
             }
             else if (deckB == true)
             {
                 deckB = false;
                 deckC = true;
+                selectedItem = null;
             }
         }
     }
@@ -131,15 +147,20 @@ public class Inventory : MonoBehaviour
             scrW = Screen.width / 16;
             scrH = Screen.height / 9;
 
-            if (GUI.Button(new Rect(13f * scrW, 1 * scrH, 2f * scrW, 1 * scrH), "Rainbow Royalty"))
+            if (GUI.Button(new Rect(13f * scrW, .25f * scrH, 2f * scrW, .75f * scrH), "Rainbow Royalty"))
             {
                 DeckA = new List<Item>();
                 DeckA.AddRange(RainbowRoyalty);
             }
-            if (GUI.Button(new Rect(13f * scrW, 2 * scrH, 2f * scrW, 1 * scrH), "Ascending Wyrm"))
+            if (GUI.Button(new Rect(13f * scrW, 1 * scrH, 2f * scrW, .75f * scrH), "Ascending Wyrm"))
             {
                 DeckA = new List<Item>();
                 DeckA.AddRange(AscendingWyrm);
+            }
+            if (GUI.Button(new Rect(13f * scrW, 1.75f * scrH, 2f * scrW, .75f * scrH), "Forest Fury"))
+            {
+                DeckA = new List<Item>();
+                DeckA.AddRange(ForestFury);
             }
 
             GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "Deck A");
@@ -172,15 +193,20 @@ public class Inventory : MonoBehaviour
             scrW = Screen.width / 16;
             scrH = Screen.height / 9;
 
-            if (GUI.Button(new Rect(13f * scrW, 1 * scrH, 2f * scrW, 1 * scrH), "Rainbow Royalty"))
+            if (GUI.Button(new Rect(13f * scrW, .25f * scrH, 2f * scrW, .75f * scrH), "Rainbow Royalty"))
             {
                 DeckB = new List<Item>();
                 DeckB.AddRange(RainbowRoyalty);
             }
-            if (GUI.Button(new Rect(13f * scrW, 2 * scrH, 2f * scrW, 1 * scrH), "Ascending Wyrm"))
+            if (GUI.Button(new Rect(13f * scrW, 1 * scrH, 2f * scrW, .75f * scrH), "Ascending Wyrm"))
             {
                 DeckB = new List<Item>();
                 DeckB.AddRange(AscendingWyrm);
+            }
+            if (GUI.Button(new Rect(13f * scrW, 1.75f * scrH, 2f * scrW, .75f * scrH), "Forest Fury"))
+            {
+                DeckB = new List<Item>();
+                DeckB.AddRange(ForestFury);
             }
 
             GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "Deck B");
@@ -198,7 +224,18 @@ public class Inventory : MonoBehaviour
             scrW = Screen.width / 16;
             scrH = Screen.height / 9;
 
-            //GUI.Box(new Rect(0, 0, 6 * scrW, Screen.height), "Deck C");
+            if (showDeckC)
+            {
+                GUI.Box(new Rect(0, 0, 3 * scrW, Screen.height), "Deck C");
+                for (int i = 0; i < DeckC.Count; i++)
+                {
+                    if(GUI.Button(new Rect(0, 0 * scrH + i * (.8f*scrH), 3*scrW,.8f*scrH), DeckC[i].Name))
+                    {
+                        Debug.Log("Viewing :" + selectedItem.Name);
+                    }
+                }
+            }
+
 
             if (!playerTurn)
             {
@@ -213,15 +250,19 @@ public class Inventory : MonoBehaviour
                 }
             }
 
-            GUI.Box(new Rect(0, 0, 12 * scrW, Screen.height), "Field");
-            for (int i = 0; i < Field.Count; i++)
+            if (showField)
             {
-                if (GUI.Button(new Rect(scrW, .5f * scrH + i * (.8f * scrH), 8 * scrW, .8f * scrH), Field[i].Name))
+                GUI.Box(new Rect(0, 0, 12 * scrW, Screen.height), "Field");
+                for (int i = 0; i < Field.Count; i++)
                 {
-                    selectedItem = Field[i];
-                    Debug.Log("Playing :" + selectedItem.Name);
+                    if (GUI.Button(new Rect(scrW, .5f * scrH + i * (.8f * scrH), 8 * scrW, .8f * scrH), Field[i].Name))
+                    {
+                        selectedItem = Field[i];
+                        Debug.Log("Playing :" + selectedItem.Name);
+                    }
                 }
             }
+
 
             if (selectedItem != null)
             {
@@ -373,6 +414,11 @@ public class Inventory : MonoBehaviour
             {
                 playerTurn = !playerTurn;
                 cardsDrawn = 0;
+            }
+            if (GUI.Button(new Rect(13f * scrW, 5 * scrH, 1 * scrW, .8f * scrH), "Deck"))
+            {
+                showDeckC = !showDeckC;
+                showField = !showField;
             }
             if (playerTurn)
             {
