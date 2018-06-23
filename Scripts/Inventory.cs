@@ -299,7 +299,6 @@ public class Inventory : MonoBehaviour
                     }
                 }
             }
-
             if (showGY)
             {
                 GUI.Box(new Rect(10 * scrW, 0, 3 * scrW, 4 * scrH), "Graveyard");
