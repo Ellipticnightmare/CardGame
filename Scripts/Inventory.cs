@@ -1,61 +1,107 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class Inventory : MonoBehaviour
+public class Inventory : MonoBehaviour //THIS IS THE NEW ONE
 {
+    #region Values and Info
     public static List<Item> DeckA = new List<Item>();
     public static List<Item> DeckB = new List<Item>();
     public static List<Item> DeckC = new List<Item>();
+    public static bool deckASelected;
+    public static bool deckBSelected;
 
     public static List<Item> Hand01 = new List<Item>();
     public static List<Item> Hand02 = new List<Item>();
     public static List<Item> Graveyard = new List<Item>();
-    public static List<Item> Field = new List<Item>();
 
-    public int cardsDrawn;
+    public static List<Item> backrowA = new List<Item>();
+    public static List<Item> fieldA = new List<Item>();
+    public static List<Item> fieldB = new List<Item>();
+    public static List<Item> backrowB = new List<Item>();
 
-    public static List<Item> RainbowRoyalty = new List<Item>();
-    public static List<Item> AscendingWyrm = new List<Item>();
+    public static int cardsToDraw;
+    public static int cardsDrawn;
+    public static int player1Health;
+    public static int player2Health;
+    public static int turnCount;
+    public static bool firstTurn;
+    public static int monsterPlay;
 
-    public static List<Item> ForestFury = new List<Item>();
-    public static List<Item> United = new List<Item>();
+    public static int backrowACount;
+    public static int fieldACount;
+    public static int fieldBCount;
+    public static int backrowBCount;
+    public static int player1HandSize;
+    public static int player2HandSize;
 
-    public bool deckA;
-    public bool deckB;
-    public bool deckC;
+    public static bool deckA;
+    public static bool deckB;
+    public static bool deckC;
     public static Item selectedItem;
+    public static Item attackingCard;
+    public static Item defendingCard;
+    public static int damageValue;
 
-    #region deckPrefabs
-    public bool RainbowRoyaltyCheck;
-    public bool AscendingWyrmCheck;
-    public bool ForestFuryCheck;
-    public bool UnitedCheck;
-    #endregion
+    public static bool attackerSelected;
+    public static bool defenderSelected;
 
-    public bool playerTurn;
-    public bool showGY;
-    public bool showDeckC;
-    public bool showField;
+    public static bool player1Turn;
+    public static bool showGY;
+    public static bool showDeckC;
+    public static bool showField;
     public static bool showHand;
+    public static bool selectedFromBackrowA;
+    public static bool selectedFromFieldA;
+    public static bool selectedFromFieldB;
+    public static bool selectedFromBackrowB;
+    public static bool selectedFromDeck;
+
+    public static int token;
+
+    public static int turnPhase;
+    public static bool drawPhase;
+    public static bool mainPhase;
+    public static bool combatPhase;
+    public static bool secondPhase;
+    public static bool endPhase;
 
     float scrW = Screen.width / 16;
     float scrH = Screen.height / 9;
 
-    public static int playMoney;
-    public float playerMoney;
+    #region prefab selection bools
+    public bool RainbowRoyaltyCheck;
+    public static List<Item> RainbowRoyalty = new List<Item>();
+    public bool AscendingWyrmCheck;
+    public static List<Item> AscendingWyrm = new List<Item>();
+    public bool ForestFuryCheck;
+    public static List<Item> ForestFury = new List<Item>();
+    public bool UnitedCheck;
+    public static List<Item> United = new List<Item>();
+    #endregion
+    #endregion
     // Use this for initialization
-    void Start()
+    public void Start()
     {
-        cardsDrawn = 0;
+        cardsToDraw = 0;
 
-        Inventory.showHand = true;
+        showField = true;
+
+        showHand = true;
 
         showDeckC = false;
 
-        playerTurn = false;
-        #region Archetypes
-        #region RainbowRoyalty
+        player1Turn = true;
+
+        turnPhase = 0;
+
+        firstTurn = true;
+
+        turnCount = 1;
+
+        #region Prefab Decks
+        #region Rainbow Royalty
         RainbowRoyalty = new List<Item>();
         RainbowRoyalty.Add(ItemData.CreateItem(001));
         RainbowRoyalty.Add(ItemData.CreateItem(002));
@@ -107,29 +153,100 @@ public class Inventory : MonoBehaviour
         ForestFury.Add(ItemData.CreateItem(123));
         ForestFury.Add(ItemData.CreateItem(124));
         ForestFury.Add(ItemData.CreateItem(125));
+        ForestFury.Add(ItemData.CreateItem(126));
+        ForestFury.Add(ItemData.CreateItem(127));
+        #endregion
         #endregion
 
-        #endregion
+        selectedFromFieldA = false;
+        selectedItem = null;
+
+        player1Health = 6000;
+        player2Health = 6000;
 
         deckA = true;
         deckB = false;
         deckC = false;
 
+
+        deckASelected = false;
+        deckBSelected = false;
     }
 
     // Update is called once per frame
-    void Update()
+    public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (player1Health <= 0)
         {
-            Debug.Log("Switch Decks");
-            if (deckA == true)
+            SceneManager.LoadScene("Player02Win");
+        }
+        if (player2Health <= 0)
+        {
+            SceneManager.LoadScene("Player01Win");
+        }
+
+        if (turnPhase == 0)
+        {
+            drawPhase = true;
+            mainPhase = false;
+            combatPhase = false;
+            secondPhase = false;
+            endPhase = false;
+        }
+        else if (turnPhase == 1)
+        {
+            drawPhase = false;
+            mainPhase = true;
+            combatPhase = false;
+            secondPhase = false;
+            endPhase = false;
+        }
+        else if (turnPhase == 2)
+        {
+            drawPhase = false;
+            mainPhase = false;
+            combatPhase = true;
+            secondPhase = false;
+            endPhase = false;
+        }
+        else if (turnPhase == 3)
+        {
+            drawPhase = false;
+            mainPhase = false;
+            combatPhase = false;
+            secondPhase = true;
+            endPhase = false;
+        }
+        else if (turnPhase == 4)
+        {
+            drawPhase = false;
+            mainPhase = false;
+            combatPhase = false;
+            secondPhase = false;
+            endPhase = true;
+        }
+        InvokeRepeating("DrawPhase", 0, 1);
+    }
+
+    public void NextDeckSelect()
+    {
+        Debug.Log("Switching Decks");
+        if (deckA)
+        {
+            if (deckASelected)
             {
                 deckA = false;
                 deckB = true;
                 selectedItem = null;
             }
-            else if (deckB == true)
+            else
+            {
+                Debug.Log("Pick a Deck");
+            }
+        }
+        else if (deckB)
+        {
+            if (deckBSelected)
             {
                 deckB = false;
                 deckC = true;
@@ -139,32 +256,383 @@ public class Inventory : MonoBehaviour
             }
         }
     }
-    void OnGUI()
+
+    public void DiscardCards()
+    {
+        if (!selectedFromDeck)
+        {
+            if (player1Turn)
+            {
+                Hand01.Remove(selectedItem);
+                Graveyard.Add(selectedItem);
+                selectedItem = null;
+                player1HandSize--;
+            }
+            else
+            {
+                Hand02.Remove(selectedItem);
+                Graveyard.Add(selectedItem);
+                selectedItem = null;
+                player2HandSize--;
+            }
+        }
+        else
+        {
+            DeckC.Remove(selectedItem);
+            Graveyard.Add(selectedItem);
+            selectedItem = null;
+        }
+    }
+
+    public void BanishCards()
+    {
+        if (!selectedFromDeck && !selectedFromBackrowA && !selectedFromBackrowB && !selectedFromFieldA && !selectedFromFieldB)
+        {
+            if (player1Turn)
+            {
+                Hand01.Remove(selectedItem);
+                selectedItem = null;
+            }
+            else
+            {
+                Hand02.Remove(selectedItem);
+                selectedItem = null;
+            }
+        }
+        else if (selectedFromDeck)
+        {
+            DeckC.Remove(selectedItem);
+        }
+        else if (selectedFromBackrowA)
+        {
+            backrowA.Remove(selectedItem);
+            selectedItem = null;
+        }
+        else if (selectedFromFieldA)
+        {
+            fieldA.Remove(selectedItem);
+            selectedItem = null;
+        }
+        else if (selectedFromFieldB)
+        {
+            fieldB.Remove(selectedItem);
+            selectedItem = null;
+        }
+        else if (selectedFromBackrowB)
+        {
+            backrowB.Remove(selectedItem);
+            selectedItem = null;
+        }
+        token++;
+    }
+
+    public void DrawPhase()
+    {
+        if (!firstTurn)
+        {
+            cardsToDraw = 1;
+        }
+        else
+        {
+            if (player1Turn)
+            {
+                cardsToDraw = 4;
+            }
+            else
+            {
+                cardsToDraw = 5;
+            }
+        }
+
+        if (cardsDrawn < cardsToDraw)
+        {
+            DrawCards();
+        }
+    }
+
+    public void DrawCards()
+    {
+        if (deckC)
+        {
+            int i = Random.Range(0, DeckC.Count);
+            selectedItem = DeckC[i];
+            DeckC.Remove(selectedItem);
+            if (player1Turn)
+            {
+                Hand01.Add(selectedItem);
+                player1HandSize++;
+            }
+            else
+            {
+                Hand02.Add(selectedItem);
+                player2HandSize++;
+            }
+            selectedItem = null;
+            cardsDrawn++;
+            return;
+        }
+    }
+
+    public void PlayCards()
+    {
+        PlayTheCards.PlayTheCard();
+        if (!PlayTheCards.specialPlay)
+        {
+            if (showGY)
+            {
+                Graveyard.Remove(selectedItem);
+                if (player1Turn)
+                {
+                    if (selectedItem.cardType == ItemType.Monster)
+                    {
+                        fieldA.Add(selectedItem);
+                        selectedItem = null;
+                    }
+                    else if (selectedItem.cardType == ItemType.Spell || selectedItem.cardType == ItemType.Trap)
+                    {
+                        backrowA.Add(selectedItem);
+                        selectedItem = null;
+                    }
+                }
+                else if (!player1Turn)
+                {
+                    if (selectedItem.cardType == ItemType.Monster)
+                    {
+                        fieldB.Add(selectedItem);
+                        selectedItem = null;
+                    }
+                    else if (selectedItem.cardType == ItemType.Spell || selectedItem.cardType == ItemType.Trap)
+                    {
+                        backrowB.Add(selectedItem);
+                        selectedItem = null;
+                    }
+                }
+            }
+            else if (!showGY)
+            {
+                if (Inventory.selectedItem.cardType == ItemType.Monster)
+                {
+                    if (monsterPlay < 1)
+                    {
+                        if (Inventory.selectedItem.Rank < 4)
+                        {
+                            if (Inventory.player1Turn && fieldACount < 5)
+                            {
+                                Inventory.fieldA.Add(Inventory.selectedItem);
+                                Inventory.Hand01.Remove(Inventory.selectedItem);
+                                monsterPlay++;
+                                fieldACount++;
+                            }
+                            else if (!player1Turn && fieldBCount < 5)
+                            {
+                                Inventory.fieldB.Add(Inventory.selectedItem);
+                                Inventory.Hand02.Remove(Inventory.selectedItem);
+                                monsterPlay++;
+                                fieldBCount++;
+                            }
+                        }
+                        else if (Inventory.selectedItem.Rank > 3 && Inventory.selectedItem.Rank < 6)
+                        {
+                            if (Inventory.token > 0 && (Inventory.fieldACount < 4))
+                            {
+                                Inventory.token--;
+                                if (Inventory.player1Turn && fieldACount < 5)
+                                {
+                                    Inventory.fieldA.Add(Inventory.selectedItem);
+                                    Inventory.Hand01.Remove(Inventory.selectedItem);
+                                    monsterPlay++;
+                                    fieldACount++;
+                                }
+                                else if (!player1Turn && fieldBCount < 5)
+                                {
+                                    Inventory.fieldB.Add(Inventory.selectedItem);
+                                    Inventory.Hand02.Remove(Inventory.selectedItem);
+                                    monsterPlay++;
+                                    fieldBCount++;
+                                }
+                            }
+
+                        }
+                        else if (Inventory.selectedItem.Rank > 6)
+                        {
+                            if (Inventory.token > 1 && (Inventory.fieldACount < 4))
+                            {
+                                Inventory.token -= 2;
+                                if (Inventory.player1Turn && fieldACount < 5)
+                                {
+                                    Inventory.fieldA.Add(Inventory.selectedItem);
+                                    Inventory.Hand01.Remove(Inventory.selectedItem);
+                                    monsterPlay++;
+                                    fieldACount++;
+                                }
+                                else if (!player1Turn && fieldBCount < 5)
+                                {
+                                    Inventory.fieldB.Add(Inventory.selectedItem);
+                                    Inventory.Hand02.Remove(Inventory.selectedItem);
+                                    monsterPlay++;
+                                    fieldBCount++;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                else
+                {
+                    if (player1Turn)
+                    {
+                        Hand01.Remove(selectedItem);
+                        backrowA.Add(selectedItem);
+                        backrowACount++;
+                    }
+                    else
+                    {
+                        Hand02.Remove(selectedItem);
+                        backrowB.Add(selectedItem);
+                        backrowBCount++;
+                    }
+                }
+                selectedItem = null;
+            }
+        }
+        PlayTheCards.specialPlay = false;
+    }
+
+    public void UseEffect()
+    {
+        return;
+    }
+
+    public void CombatRun()
+    {
+        if (attackingCard.Attack > defendingCard.Attack)
+        {
+            damageValue = (attackingCard.Attack -= defendingCard.Attack);
+            if (player1Turn)
+            {
+                player2Health -= damageValue;
+                fieldB.Remove(defendingCard);
+                Graveyard.Add(defendingCard);
+            }
+            else if (!player1Turn)
+            {
+                player1Health -= damageValue;
+                fieldA.Remove(defendingCard);
+                Graveyard.Add(defendingCard);
+            }
+        }
+        else if (defendingCard.Attack > attackingCard.Attack)
+        {
+            damageValue = (defendingCard.Attack -= attackingCard.Attack);
+            if (player1Turn)
+            {
+                player1Health -= damageValue;
+                fieldA.Remove(attackingCard);
+                Graveyard.Add(attackingCard);
+            }
+            else if (!player1Turn)
+            {
+                player2Health -= damageValue;
+                fieldA.Remove(attackingCard);
+                Graveyard.Add(attackingCard);
+            }
+        }
+        attackingCard = null;
+        defendingCard = null;
+    }
+
+    public void EndPhase()
+    {
+        if (player1Turn)
+        {
+            if (player1HandSize >= 7)
+            {
+                Debug.Log("Discard Cards");
+            }
+            else
+            {
+                player1Turn = false;
+                turnPhase = 0;
+                cardsDrawn = 0;
+                DrawPhase();
+                monsterPlay = 0;
+            }
+        }
+        else if (!player1Turn)
+        {
+            if (player2HandSize >= 7)
+            {
+                Debug.Log("Discard Cards");
+            }
+            else
+            {
+                firstTurn = false;
+                player1Turn = true;
+                turnPhase = 0;
+                cardsDrawn = 0;
+                DrawPhase();
+                monsterPlay = 0;
+            }
+        }
+    }
+
+    public void PhaseChange()
+    {
+        if (turnPhase < 4)
+        {
+            turnPhase++;
+        }
+    }
+
+    public void ForfeitDuel()
+    {
+        if (player1Turn)
+        {
+            SceneManager.LoadScene("Player02Win");
+        }
+        else
+        {
+            SceneManager.LoadScene("Player01Win");
+        }
+    }
+
+    public void OnGUI()
     {
         scrW = Screen.width / 16;
         scrH = Screen.height / 9;
 
         if (deckA == true)
         {
-            scrW = Screen.width / 16;
-            scrH = Screen.height / 9;
-
-            if (GUI.Button(new Rect(13f * scrW, .25f * scrH, 2f * scrW, .75f * scrH), "Rainbow Royalty"))
+            if (GUI.Button(new Rect(14 * scrW, .25f * scrH, 2 * scrW, .75f * scrH), "Rainbow Royalty"))
             {
                 DeckA = new List<Item>();
                 DeckA.AddRange(RainbowRoyalty);
+                deckASelected = true;
             }
-            if (GUI.Button(new Rect(13f * scrW, 1 * scrH, 2f * scrW, .75f * scrH), "Ascending Wyrm"))
+            if (GUI.Button(new Rect(14 * scrW, 1 * scrH, 2 * scrH, .75f * scrH), "Ascending Wyrm"))
             {
                 DeckA = new List<Item>();
                 DeckA.AddRange(AscendingWyrm);
+                deckASelected = true;
             }
-            if (GUI.Button(new Rect(13f * scrW, 1.75f * scrH, 2f * scrW, .75f * scrH), "Forest Fury"))
+            if (GUI.Button(new Rect(14 * scrW, 1.75f * scrH, 2 * scrH, .75f * scrH), "Forest Fury"))
             {
                 DeckA = new List<Item>();
                 DeckA.AddRange(ForestFury);
+                deckASelected = true;
             }
 
+            if (GUI.Button(new Rect(14 * scrW, 7.5f * scrH, 2 * scrH, .75f * scrH), "Erase"))
+            {
+                DeckA = new List<Item>();
+                deckASelected = false;
+            }
+            if (GUI.Button(new Rect(14 * scrW, 8.25f * scrH, 2 * scrH, .75f * scrH), "Continue"))
+            {
+                NextDeckSelect();
+            }
+
+            #region deckList
             GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "Deck A");
             for (int i = 0; i < DeckA.Count; i++)
             {
@@ -181,54 +649,80 @@ public class Inventory : MonoBehaviour
                         GUI.TextArea(new Rect(6.25f * scrW, 6.5f * scrH, 1.75f * scrW, .4f * scrH), selectedItem.Attack + "   ATK");
                         GUI.TextArea(new Rect(8f * scrW, 6.5f * scrH, 1.75f * scrW, .4f * scrH), selectedItem.Defense + "     Def");
                     }
-
                 }
                 if (GUI.Button(new Rect(0.5f * scrW, 0.25f * scrH + i * (0.5f * scrH), 3 * scrW, 0.5f * scrH), DeckA[i].Name))
                 {
                     selectedItem = DeckA[i];
                     Debug.Log(selectedItem.Name);
                 }
+
             }
+            #endregion
         }
         else if (deckB == true)
         {
-            scrW = Screen.width / 16;
-            scrH = Screen.height / 9;
-
-            if (GUI.Button(new Rect(13f * scrW, .25f * scrH, 2f * scrW, .75f * scrH), "Rainbow Royalty"))
+            if (GUI.Button(new Rect(14 * scrW, .25f * scrH, 2 * scrW, .75f * scrH), "Rainbow Royalty"))
             {
                 DeckB = new List<Item>();
                 DeckB.AddRange(RainbowRoyalty);
+                deckBSelected = true;
             }
-            if (GUI.Button(new Rect(13f * scrW, 1 * scrH, 2f * scrW, .75f * scrH), "Ascending Wyrm"))
+            if (GUI.Button(new Rect(14 * scrW, 1 * scrH, 2 * scrH, .75f * scrH), "Ascending Wyrm"))
             {
                 DeckB = new List<Item>();
                 DeckB.AddRange(AscendingWyrm);
+                deckBSelected = true;
             }
-            if (GUI.Button(new Rect(13f * scrW, 1.75f * scrH, 2f * scrW, .75f * scrH), "Forest Fury"))
+            if (GUI.Button(new Rect(14 * scrW, 1.75f * scrH, 2 * scrH, .75f * scrH), "Forest Fury"))
             {
                 DeckB = new List<Item>();
                 DeckB.AddRange(ForestFury);
+                deckBSelected = true;
             }
 
-            GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "Deck B");
-            for (int i = 0; i < DeckB.Count; i++)
+            if (GUI.Button(new Rect(14 * scrW, 7.5f * scrH, 2 * scrH, .75f * scrH), "Erase"))
             {
-                if (GUI.Button(new Rect(0.5f * scrW, 0.25f * scrH + i * (0.5f * scrH), 3 * scrW, 0.5f * scrH), DeckB[i].Name))
+                DeckB = new List<Item>();
+                deckBSelected = false;
+            }
+            if (GUI.Button(new Rect(14 * scrW, 8.25f * scrH, 2 * scrH, .75f * scrH), "Continue"))
+            {
+                NextDeckSelect();
+            }
+
+            #region deckList
+            GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "Deck B");
+            for (int i = 0; i < DeckA.Count; i++)
+            {
+                if (selectedItem != null)
+                {
+                    GUI.Box(new Rect(5.9f * scrW, .8f * scrH, 4.2f * scrW, 6.4f * scrH), "");
+                    GUI.TextArea(new Rect(6.25f * scrW, 1f * scrH, 3.5f * scrW, .4f * scrH), selectedItem.Name);
+                    GUI.TextArea(new Rect(6.25f * scrW, 1.4f * scrH, 1.75f * scrW, .4f * scrH), selectedItem.Type);
+                    GUI.DrawTexture(new Rect(6.5f * scrW, 1.85f * scrH, 3f * scrW, 2.5f * scrH), selectedItem.Icon);
+                    GUI.TextArea(new Rect(6.5f * scrW, 4.4f * scrH, 3f * scrW, 2f * scrH), selectedItem.Description);
+                    if (selectedItem.cardType == ItemType.Monster)
+                    {
+                        GUI.TextArea(new Rect(8f * scrW, 1.4f * scrH, 1.75f * scrW, .4f * scrH), " Rank:  " + selectedItem.Rank);
+                        GUI.TextArea(new Rect(6.25f * scrW, 6.5f * scrH, 1.75f * scrW, .4f * scrH), selectedItem.Attack + "   ATK");
+                        GUI.TextArea(new Rect(8f * scrW, 6.5f * scrH, 1.75f * scrW, .4f * scrH), selectedItem.Defense + "     Def");
+                    }
+                }
+                if (GUI.Button(new Rect(0.5f * scrW, 0.25f * scrH + i * (0.5f * scrH), 3 * scrW, 0.5f * scrH), DeckA[i].Name))
                 {
                     selectedItem = DeckB[i];
                     Debug.Log(selectedItem.Name);
                 }
+
             }
+            #endregion
         }
         else if (deckC == true)
         {
-            scrW = Screen.width / 16;
-            scrH = Screen.height / 9;
-
+            GUI.Box(new Rect(13 * scrW, 8 * scrH, 2 * scrW, .5f * scrH), "Tokens: " + token);
             if (selectedItem != null)
             {
-                Inventory.showHand = false;
+                showHand = false;
                 GUI.Box(new Rect(12.1f * scrW, 0f * scrH, 4f * scrW, 6.4f * scrH), "");
                 GUI.TextArea(new Rect(12.325f * scrW, .2f * scrH, 3.5f * scrW, .4f * scrH), selectedItem.Name);
                 GUI.TextArea(new Rect(12.3f * scrW, .6f * scrH, 1.75f * scrW, .4f * scrH), selectedItem.Type);
@@ -243,8 +737,84 @@ public class Inventory : MonoBehaviour
             }
             else if (selectedItem == null)
             {
-                Inventory.showHand = true;
+                showHand = true;
             }
+            #region fieldZones
+            if (showField)
+            {
+                //backrowB
+                GUI.Box(new Rect(0, 0, 8 * scrW, 2 * scrH), "");
+                for (int i = 0; i < backrowB.Count; i++)
+                {
+                    GUI.TextArea(new Rect(0 * scrW + i * (2 * scrH), 0 * scrH, 2 * scrW, .25f * scrH), backrowB[i].Name);
+                    if (GUI.Button(new Rect(0 * scrW + i * (2 * scrH), 0 * scrH, 2 * scrW, 2 * scrH), backrowB[i].Icon))
+                    {
+                        selectedItem = backrowB[i];
+                        selectedFromBackrowA = false;
+                        selectedFromFieldA = false;
+                        selectedFromFieldB = false;
+                        selectedFromBackrowB = true;
+                        selectedFromDeck = false;
+                    }
+                }
+                //fieldB
+                GUI.Box(new Rect(0, 2 * scrH, 8 * scrW, 2 * scrH), "");
+                for (int i = 0; i < fieldB.Count; i++)
+                {
+                    GUI.TextArea(new Rect(0 * scrW + i * (2 * scrH), 2 * scrH, 2 * scrW, .25f * scrH), fieldB[i].Name);
+                    if (GUI.Button(new Rect(0 * scrW + i * (2 * scrH), 2 * scrH, 2 * scrW, 2 * scrH), fieldB[i].Icon))
+                    {
+                        selectedItem = fieldB[i];
+                        selectedFromBackrowA = false;
+                        selectedFromFieldA = false;
+                        selectedFromFieldB = true;
+                        selectedFromBackrowB = false;
+                        selectedFromDeck = false;
+                    }
+                }
+                //Health Stuff
+                GUI.Box(new Rect(0.25f * scrW, 4.25f * scrH, 2f * scrW, .5f * scrH), "" + player1Health);
+                GUI.Box(new Rect(5.75f * scrW, 4.25f * scrH, 2f * scrW, .5f * scrH), "" + player2Health);
+                if (player1Turn)
+                {
+                    GUI.Box(new Rect(3f * scrW, 4.1f * scrH, 2f * scrW, .8f * scrH), "Player 01");
+                }
+                else if (!player1Turn)
+                {
+                    GUI.Box(new Rect(3f * scrW, 4.1f * scrH, 2f * scrW, .8f * scrH), "Player 02");
+                }
+                //fieldA
+                GUI.Box(new Rect(0, 5 * scrH, 8 * scrW, 2 * scrH), "");
+                for (int i = 0; i < fieldA.Count; i++)
+                {
+                    GUI.TextArea(new Rect(0 * scrW + i * (2 * scrH), 5 * scrH, 2 * scrW, .25f * scrH), fieldA[i].Name);
+                    if (GUI.Button(new Rect(0 * scrW + i * (2 * scrH), 5 * scrH, 2 * scrW, 2 * scrH), fieldA[i].Icon))
+                    {
+                        selectedItem = fieldA[i];
+                        selectedFromBackrowA = false;
+                        selectedFromFieldA = true;
+                        selectedFromFieldB = false;
+                        selectedFromBackrowB = false;
+                        selectedFromDeck = false;
+                    }
+                }
+                //backrowA
+                GUI.Box(new Rect(0, 7 * scrH, 8 * scrW, 2 * scrH), "");
+                for (int i = 0; i < backrowA.Count; i++)
+                {
+                    GUI.TextArea(new Rect(0 * scrW + i * (2 * scrH), 7 * scrH, 2 * scrW, .25f * scrH), backrowA[i].Name);
+                    if (GUI.Button(new Rect(0 * scrW + i * (2 * scrH), 7 * scrH, 2 * scrW, 2 * scrH), backrowA[i].Icon))
+                    {
+                        selectedItem = backrowA[i];
+                        selectedFromBackrowA = true;
+                        selectedFromFieldA = false;
+                        selectedFromFieldB = false;
+                        selectedFromBackrowB = false;
+                        selectedFromDeck = false;
+                    }
+                }
+            }
+            #endregion
 
             if (showDeckC)
             {
@@ -254,12 +824,19 @@ public class Inventory : MonoBehaviour
                     if (GUI.Button(new Rect(0, 0 * scrH + i * (.8f * scrH), 3 * scrW, .8f * scrH), DeckC[i].Name))
                     {
                         Debug.Log("Viewing :" + selectedItem.Name);
+                        selectedFromBackrowA = false;
+                        selectedFromFieldA = false;
+                        selectedFromFieldB = false;
+                        selectedFromBackrowB = false;
+                        selectedFromDeck = true;
                     }
                 }
             }
-            if (!playerTurn)
+
+            #region hand stuff
+            if (player1Turn)
             {
-                if (Inventory.showHand == true)
+                if (showHand == true)
                 {
                     GUI.Box(new Rect(13 * scrW, 0, 3 * scrW, 4 * scrH), "Hand01");
                     for (int i = 0; i < Hand01.Count; i++)
@@ -272,9 +849,9 @@ public class Inventory : MonoBehaviour
                     }
                 }
             }
-            else if (playerTurn)
+            else if (!player1Turn)
             {
-                if (Inventory.showHand == true)
+                if (showHand == true)
                 {
                     GUI.Box(new Rect(13 * scrW, 0, 3 * scrW, 4 * scrH), "Hand02");
                     for (int i = 0; i < Hand02.Count; i++)
@@ -287,243 +864,192 @@ public class Inventory : MonoBehaviour
                     }
                 }
             }
-            if (FieldScript.showField)
-            {
-                GUI.Box(new Rect(0, 0, 12 * scrW, Screen.height), "Field");
-                for (int i = 0; i < Field.Count; i++)
-                {
-                    if (GUI.Button(new Rect(scrW, .5f * scrH + i * (.8f * scrH), 8 * scrW, .8f * scrH), Field[i].Name))
-                    {
-                        selectedItem = Field[i];
-                        Debug.Log("Playing :" + selectedItem.Name);
-                    }
-                }
-            }
+            #endregion
+            #region GY stuff
             if (showGY)
             {
-                GUI.Box(new Rect(10 * scrW, 0, 3 * scrW, 4 * scrH), "Graveyard");
-                for (int i = 0; i < Graveyard.Count; i++)
+                if (selectedItem != null)
                 {
-                    if (GUI.Button(new Rect(10 * scrW, .25f * scrH + i * (0.5f * scrH), 3 * scrW, .5f * scrH), Graveyard[i].Name))
+                    GUI.Box(new Rect(8 * scrW, 0, 3 * scrW, 4 * scrH), "Graveyard");
+                    for (int i = 0; i < Graveyard.Count; i++)
                     {
-                        selectedItem = Graveyard[i];
-                        Debug.Log(selectedItem.Name);
+                        if (GUI.Button(new Rect(8 * scrW, .25f * scrH + i * (0.5f * scrH), 3 * scrW, .5f * scrH), Graveyard[i].Name))
+                        {
+                            selectedItem = Graveyard[i];
+                            Debug.Log(selectedItem.Name);
+                        }
+                    }
+                }
+                else if (selectedItem == null)
+                {
+                    GUI.Box(new Rect(10 * scrW, 0, 3 * scrW, 4 * scrH), "Graveyard");
+                    for (int i = 0; i < Graveyard.Count; i++)
+                    {
+                        if (GUI.Button(new Rect(10 * scrW, .25f * scrH + i * (0.5f * scrH), 3 * scrW, .5f * scrH), Graveyard[i].Name))
+                        {
+                            selectedItem = Graveyard[i];
+                            Debug.Log(selectedItem.Name);
+                        }
                     }
                 }
             }
-
-            #region main Controls
+            #endregion
+            #region Control Panel
             if (selectedItem == null)
             {
                 if (GUI.Button(new Rect(13f * scrW, 4f * scrH, 1f * scrW, .6f * scrH), "Draw"))
                 {
-                    if (!playerTurn && cardsDrawn < 1)
-                    {
-                        int i = Random.Range(0, DeckC.Count);
-                        selectedItem = DeckC[i];
-                        DeckC.Remove(selectedItem);
-                        Hand01.Add(selectedItem);
-                        selectedItem = null;
-                        cardsDrawn++;
-                        return;
-                    }
-                    else if (playerTurn && cardsDrawn < 1)
-                    {
-                        int i = Random.Range(0, DeckC.Count);
-                        selectedItem = DeckC[i];
-                        DeckC.Remove(selectedItem);
-                        Hand02.Add(selectedItem);
-                        selectedItem = null;
-                        cardsDrawn++;
-                        return;
-                    }
+                    DrawPhase();
                 }
+
                 if (GUI.Button(new Rect(14f * scrW, 4f * scrH, 1f * scrW, .6f * scrH), "GY"))
                 {
-                    if (selectedItem == null)
-                    {
-                        showGY = !showGY;
-                    }
+                    showGY = !showGY;
                 }
-                if (GUI.Button(new Rect(15f * scrW, 4f * scrH, 1 * scrW, .6f * scrH), "End"))
+                if (GUI.Button(new Rect(15f * scrW, 4f * scrH, 1f * scrW, .6f * scrH), "End"))
                 {
-                    playerTurn = !playerTurn;
-                    cardsDrawn = 0;
+                    EndPhase();
                 }
-                if (GUI.Button(new Rect(13f * scrW, 4.6f * scrH, 1 * scrW, .6f * scrH), "Deck"))
+                if (GUI.Button(new Rect(13f * scrW, 4.6f * scrH, 1f * scrW, .6f * scrH), "Deck"))
                 {
-                    if (FieldScript.showField == true)
+                    if (showField)
                     {
-                        FieldScript.showField = false;
-                    }
-                    if (Inventory.showHand == true)
-                    {
-                        Inventory.showHand = false;
+                        showField = false;
                     }
                     showDeckC = !showDeckC;
                 }
-                if (GUI.Button(new Rect(14 * scrW, 4.6f * scrH, 1 * scrW, .6f * scrH), "Field"))
+                if (GUI.Button(new Rect(14f * scrW, 4.6f * scrH, 1f * scrW, .6f * scrH), "Field"))
                 {
                     if (showDeckC)
                     {
                         showDeckC = false;
-                        FieldScript.showField = true;
+                        showField = true;
+                    }
+                }
+                if (GUI.Button(new Rect(15f * scrW, 8f * scrH, 1f * scrW, .6f * scrH), "Forfeit"))
+                {
+                    ForfeitDuel();
+                }
+                if (GUI.Button(new Rect(15f * scrW, 4.6f * scrH, 1 * scrW, .6f * scrH), "Next"))
+                {
+                    PhaseChange();
+                }
+                if (defenderSelected && attackerSelected)
+                {
+                    if (Input.GetKeyDown(KeyCode.Space))
+                    {
+                        CombatRun();
                     }
                 }
             }
             else if (selectedItem != null)
             {
-                if (GUI.Button(new Rect(13f * scrW, 6.4f * scrH, 1f * scrW, .6f * scrH), "Draw"))
-                {
-                    if (!playerTurn && cardsDrawn < 1)
-                    {
-                        int i = Random.Range(0, DeckC.Count);
-                        selectedItem = DeckC[i];
-                        DeckC.Remove(selectedItem);
-                        Hand01.Add(selectedItem);
-                        selectedItem = null;
-                        cardsDrawn++;
-                        return;
-                    }
-                    else if (playerTurn && cardsDrawn < 1)
-                    {
-                        int i = Random.Range(0, DeckC.Count);
-                        selectedItem = DeckC[i];
-                        DeckC.Remove(selectedItem);
-                        Hand02.Add(selectedItem);
-                        selectedItem = null;
-                        cardsDrawn++;
-                        return;
-                    }
-                }
-                if (GUI.Button(new Rect(14f * scrW, 6.4f * scrH, 1f * scrW, .6f * scrH), "GY"))
-                {
-                    if (selectedItem == null)
-                    {
-                        showGY = !showGY;
-                    }
-                }
-                if (GUI.Button(new Rect(15f * scrW, 6.4f * scrH, 1 * scrW, .6f * scrH), "End"))
-                {
-                    playerTurn = !playerTurn;
-                    cardsDrawn = 0;
-                }
-                if (GUI.Button(new Rect(13f * scrW, 7f * scrH, 1 * scrW, .6f * scrH), "Deck"))
-                {
-                    if (FieldScript.showField == true)
-                    {
-                        FieldScript.showField = false;
-                    }
-                    if (Inventory.showHand == true)
-                    {
-                        Inventory.showHand = false;
-                    }
-                    showDeckC = !showDeckC;
-                }
-                if (GUI.Button(new Rect(14 * scrW, 7f * scrH, 1 * scrW, .6f * scrH), "Deselect"))
+                if (GUI.Button(new Rect(13f * scrW, 6.4f * scrH, 1 * scrW, .6f * scrH), "Deselct"))
                 {
                     selectedItem = null;
                 }
-                if (!showGY)
+                if (GUI.Button(new Rect(14f * scrW, 6.4f * scrH, 1 * scrW, .6f * scrH), "Play"))
                 {
-                    if (GUI.Button(new Rect(13 * scrW, 7.6f * scrH, 1 * scrW, .6f * scrH), "Play"))
+                    PlayCards();
+                }
+                if (GUI.Button(new Rect(15 * scrW, 6.4f * scrH, 1 * scrW, .6f * scrH), "Discard"))
+                {
+                    DiscardCards();
+                }
+                if (!selectedFromDeck)
+                {
+                    if (GUI.Button(new Rect(13f * scrW, 7f * scrH, 1f * scrW, .6f * scrH), "Return"))
                     {
-                        if (!playerTurn)
+                        if (player1Turn)
                         {
                             Hand01.Remove(selectedItem);
-                            Field.Add(selectedItem);
-                            selectedItem = null;
                         }
                         else
                         {
                             Hand02.Remove(selectedItem);
-                            Field.Add(selectedItem);
-                            selectedItem = null;
+                        }
+                        DeckC.Add(selectedItem);
+                        selectedItem = null;
+                    }
+                }
+                else if (selectedFromDeck)
+                {
+                    if (GUI.Button(new Rect(13f * scrW, 7f * scrH, 1f * scrW, .6f * scrH), "Add"))
+                    {
+                        DeckC.Remove(selectedItem);
+                        if (player1Turn)
+                        {
+                            Hand01.Add(selectedItem);
+                        }
+                        else
+                        {
+                            Hand02.Add(selectedItem);
+                        }
+                        selectedItem = null;
+                    }
+                }
+                if (selectedFromBackrowA || selectedFromFieldA || selectedFromFieldB || selectedFromBackrowB)
+                {
+                    if (GUI.Button(new Rect(15 * scrW, 7f * scrH, 1f * scrW, .6f * scrH), "Use"))
+                    {
+                        UseEffect();
+                    }
+                }
+
+                if (GUI.Button(new Rect(14 * scrW, 7f * scrH, 1f * scrW, .6f * scrH), "Banish"))
+                {
+                    BanishCards();
+                }
+            }
+            #endregion
+            #region Combat stuff
+            if (combatPhase)
+            {
+                if (player1Turn)
+                {
+                    if (selectedFromFieldA)
+                    {
+                        if (GUI.Button(new Rect(13 * scrW, 7.6f * scrH, 1 * scrW, .6f * scrH), "Attacker"))
+                        {
+                            attackingCard = selectedItem;
+                            Debug.Log("Attacker Selected");
+                            attackerSelected = true;
                         }
                     }
-                    if (GUI.Button(new Rect(14 * scrW, 7.6f * scrH, 1 * scrW, .6F * scrH), "Discard"))
+                    if (selectedFromFieldB)
                     {
-                        if (!playerTurn)
+                        if (GUI.Button(new Rect(13 * scrW, 7.6f * scrH, 1 * scrW, .6f * scrH), "Target"))
                         {
-                            Hand01.Remove(selectedItem);
-                            Graveyard.Add(selectedItem);
-                            selectedItem = null;
-                        }
-                        else
-                        {
-                            Hand02.Remove(selectedItem);
-                            Graveyard.Add(selectedItem);
-                            selectedItem = null;
-                        }
-                    }
-                    if (GUI.Button(new Rect(15 * scrW, 7.6f * scrH, 1 * scrW, .6f * scrH), "Return"))
-                    {
-                        if (!playerTurn)
-                        {
-                            Hand01.Remove(selectedItem);
-                            DeckC.Add(selectedItem);
-                            selectedItem = null;
-                        }
-                        else
-                        {
-                            Hand02.Remove(selectedItem);
-                            DeckC.Add(selectedItem);
-                            selectedItem = null;
-                        }
-                    }
-                    if (GUI.Button(new Rect(13 * scrW, 8.2f * scrH, 1 * scrW, .6f * scrH), "Banish"))
-                    {
-                        if (!playerTurn)
-                        {
-                            Hand01.Remove(selectedItem);
-                            selectedItem = null;
-                        }
-                        else
-                        {
-                            Hand02.Remove(selectedItem);
-                            selectedItem = null;
+                            defendingCard = selectedItem;
+                            Debug.Log("Defender Selected");
+                            defenderSelected = true;
                         }
                     }
                 }
                 else
                 {
-                    if (GUI.Button(new Rect(13 * scrW, 7.6f * scrH, 1 * scrW, .6f * scrH), "Play"))
+                    if (selectedFromFieldB)
                     {
-                        Graveyard.Remove(selectedItem);
-                        Field.Add(selectedItem);
-                        selectedItem = null;
-                    }
-                    if (GUI.Button(new Rect(14 * scrW, 7.6f * scrH, 1 * scrW, .6F * scrH), "Hand"))
-                    {
-                        if (!playerTurn)
+                        if (GUI.Button(new Rect(13 * scrW, 7.6f * scrH, 1 * scrW, .6f * scrH), "Attacker"))
                         {
-                            Hand01.Add(selectedItem);
-                            Graveyard.Remove(selectedItem);
-                            selectedItem = null;
-                            showGY = false;
-                        }
-                        else
-                        {
-                            Hand02.Add(selectedItem);
-                            Graveyard.Remove(selectedItem);
-                            selectedItem = null;
-                            showGY = false;
+                            attackingCard = selectedItem;
+                            Debug.Log("Attacker Selected");
+                            attackerSelected = true;
                         }
                     }
-                    if (GUI.Button(new Rect(15 * scrW, 7.6f * scrH, 1 * scrW, .6f * scrH), "Deck"))
+                    if (selectedFromFieldA)
                     {
-                        Graveyard.Remove(selectedItem);
-                        DeckC.Add(selectedItem);
-                        selectedItem = null;
-                    }
-                    if (GUI.Button(new Rect(13 * scrW, 8.2f * scrH, 1 * scrW, .6f * scrH), "Banish"))
-                    {
-                        Graveyard.Remove(selectedItem);
-                        selectedItem = null;
+                        if (GUI.Button(new Rect(13 * scrW, 7.6f * scrH, 1 * scrW, .6f * scrH), "Target"))
+                        {
+                            defendingCard = selectedItem;
+                            Debug.Log("Defender Selected");
+                            defenderSelected = true;
+                        }
                     }
                 }
             }
             #endregion
         }
+
     }
 }

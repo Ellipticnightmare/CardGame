@@ -14,6 +14,9 @@ public class ItemHandler : MonoBehaviour
     public string icon;
     public string mesh;
     public ItemType cardType;
+    public EffType effectType;
+    public EffUseType useType;
+    public int effectValue;
     #endregion
     public void OnCollection()
     {
@@ -28,6 +31,9 @@ public class ItemHandler : MonoBehaviour
         temp.Icon = Resources.Load("Icons/" + icon) as Texture2D;
         temp.MeshName = Resources.Load("Prefabs/" + mesh) as GameObject;
         temp.cardType = cardType;
+        temp.effectType = effectType;
+        temp.useType = useType;
+        temp.EffectValue = effectValue;
 
         Inventory inventory = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Inventory>();
 

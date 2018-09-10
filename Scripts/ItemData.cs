@@ -15,6 +15,10 @@ public static class ItemData
         string mesh = "";
         ItemType cardType = ItemType.Spell;
 
+        EffType effectType = EffType.HealSelf;
+        EffUseType effuseType = EffUseType.Repeat;
+        int effectValue = 0;
+
         switch (itemId)
         {
             #region Archetypes
@@ -35,9 +39,12 @@ public static class ItemData
                 break;
             case 003:
                 name = "Chromagic: Divine Light";
-                description = "Discard as many cards as desired.  The player of your choice gains 500 Health for each card discarded.";
+                description = "Discard as many cards as desired.  You gain 500 Health for each card discarded.";
                 type = "Light";
                 cardType = ItemType.Spell;
+                effectType = EffType.HealSelf;
+                effuseType = EffUseType.Repeat;
+                effectValue = 500;
                 break;
             case 004:
                 name = "Chromagic: Blessed Armor";
@@ -73,8 +80,12 @@ public static class ItemData
             #region AscendingWyrm
             case 009:
                 name = "Miracle Scale";
-                description = "Spend x * 100.  For each 100 Health spent, increase the rank of 1 monster on the field by one.";
+                description = "Spend x * 100 Health.  For each 100 Health spent, increase the rank of 1 monster on the field by one.";
                 type = "Dark";
+                cardType = ItemType.Spell;
+                effectType = EffType.DamageSelf;
+                effuseType = EffUseType.Repeat;
+                effectValue = 100;
                 break;
             case 010:
                 name = "Void Caller";
@@ -118,7 +129,7 @@ public static class ItemData
             case 101:
                 name = "Street Urchin";
                 description = "This card is treated as a Light type until it declares an attack.  This card may attack your opponent directly";
-                type = "Light";
+                type = "Dark";
                 icon = "streetUrchin";
                 attack = 700;
                 defense = 100;
@@ -269,7 +280,25 @@ public static class ItemData
                 rank = 4;
                 cardType = ItemType.Monster;
                 break;
-#endregion
+            case 126:
+                name = "Ent";
+                description = "This card cannot be normal summoned.  If this card was special summoned through the effect of Treeant, negate and destroy all spell cards on the field while this card remains face-up.";
+                type = "Wood";
+                attack = 2200;
+                defense = 2200;
+                rank = 8;
+                cardType = ItemType.Monster;
+                break;
+            case 127:
+                name = "Seedling";
+                description = "When this card is destroyed by battle, you may add 1 Sapling from the deck to your hand.";
+                type = "Wood";
+                attack = 100;
+                defense = 100;
+                rank = 1;
+                cardType = ItemType.Monster;
+                break;
+                #endregion
             #region United
 
             #endregion
@@ -283,21 +312,25 @@ public static class ItemData
                 name = "Spirit Bond";
                 description = "Discard 1 card to negate the effect of a card of the same type";
                 type = "Fire";
+                cardType = ItemType.Trap;
                 break;
             case 202:
                 name = "Phalanx Bond";
                 description = "This card stays face-up on the field.  While this card is active, all North Star Knights gain 100 ATK and DEF per card on the field.";
                 type = "Wood";
+                cardType = ItemType.Trap;
                 break;
             case 203:
                 name = "False Retirement";
                 description = "For every Ancient King, Tapestry Queen, and Warrior Princess face-up on the field, 1 card may be un-tokened.";
                 type = "Wood";
+                cardType = ItemType.Trap;
                 break;
             case 204:
                 name = "Military Bluff";
                 description = "This card remains face-up on the field.  Once per turn, flip 3 coins per facedown card.  On 2 or more heads, that card is destroyed without flipping or activating effects";
                 type = "Dark";
+                cardType = ItemType.Trap;
                 break;
             #endregion
             #region AscendingWyrm
@@ -305,6 +338,17 @@ public static class ItemData
                 name = "Wyrm Ascension";
                 description = "Reduce your Health to 1.  After this cost resolves, special summon as many Ascension Dragon type monsters as possible from the Graveyard, and recover x100 Health, x being the total rank of all monsters special summoned by this cards effect.";
                 type = "Light";
+                cardType = ItemType.Trap;
+                effectType = EffType.DamageSelf;
+                effuseType = EffUseType.Once;
+                if (Inventory.player1Turn)
+                {
+                    effectValue = Inventory.player1Health - 1;
+                }
+                else if(Inventory.player1Turn == false)
+                {
+                    effectValue = Inventory.player2Health - 1;
+                }
                 break;
             #endregion
             #region United
@@ -326,15 +370,21 @@ public static class ItemData
                 break;
             case 401:
                 name = "Sunbeam";
-                description = "Gain 1000 health on the next turn after this card is played";
+                description = "Gain 1000 health";
                 type = "Light";
                 cardType = ItemType.Spell;
+                effectType = EffType.HealSelf;
+                effuseType = EffUseType.Once;
+                effectValue = 1000;
                 break;
             case 402:
                 name = "Bandit Specialist";
                 description = "Spend 500 Health.  Your opponent discards any and all traps currently in their hand";
                 type = "Fire";
                 cardType = ItemType.Spell;
+                effectType = EffType.DamageSelf;
+                effuseType = EffUseType.Once;
+                effectValue = 500;
                 break;
             #endregion
             #region Monsters
@@ -372,6 +422,9 @@ public static class ItemData
         temp.Icon = Resources.Load("Icons/" + icon) as Texture2D;
         temp.MeshName = Resources.Load("Prefabs/" + mesh) as GameObject;
         temp.cardType = cardType;
+        temp.effectType = effectType;
+        temp.useType = effuseType;
+        temp.EffectValue = effectValue;
 
         return temp;
     }
